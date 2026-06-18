@@ -7,8 +7,9 @@ export class CarView {
   readonly group = new THREE.Group();
   private frontWheels: THREE.Mesh[] = [];
   private brakeLights: THREE.Mesh[] = [];
+  private marker?: THREE.Group;
 
-  constructor(color: number) {
+  constructor(color: number, isPlayer = false) {
     // Self-emissive keeps the neon body color true under the cool purple ambient.
     const bodyMat = new THREE.MeshLambertMaterial({
       color,
@@ -65,6 +66,30 @@ export class CarView {
     aura.position.y = 0.05;
     aura.name = 'aura';
     this.group.add(aura);
+
+    if (isPlayer) this.marker = this.buildMarker();
+  }
+
+  // A small, bright, bobbing downward arrow floating above the player's car so
+  // you can always tell which one is you (vs a same-colored teammate).
+  private buildMarker(): THREE.Group {
+    const m = new THREE.Group();
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.8, 1.3, 4),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    );
+    cone.rotation.x = Math.PI; // tip points down at the car
+    m.add(cone);
+    // thin dark outline shell so it reads against light cars/ball
+    const shell = new THREE.Mesh(
+      new THREE.ConeGeometry(0.95, 1.5, 4),
+      new THREE.MeshBasicMaterial({ color: 0x1b1230, side: THREE.BackSide }),
+    );
+    shell.rotation.x = Math.PI;
+    m.add(shell);
+    m.position.y = 4.2;
+    this.group.add(m);
+    return m;
   }
 
   sync(car: Car) {
@@ -75,5 +100,12 @@ export class CarView {
     const aura = this.group.getObjectByName('aura') as THREE.Mesh;
     const m = aura.material as THREE.MeshBasicMaterial;
     m.opacity += ((car.boosting ? 0.85 : 0) - m.opacity) * 0.2;
+
+    if (this.marker) {
+      const t = performance.now() * 0.003;
+      this.marker.position.y = 4.2 + Math.sin(t) * 0.35;
+      // counter-rotate so the marker keeps facing camera-agnostic and just spins
+      this.marker.rotation.y = -car.yaw + t * 0.8;
+    }
   }
 }

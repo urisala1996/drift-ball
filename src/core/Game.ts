@@ -8,7 +8,7 @@ import { buildArena } from '../render/Arena';
 import { BallView } from '../render/BallView';
 import { CarView } from '../render/CarView';
 import { Scene } from '../render/Scene';
-import { COLORS, FIXED_DT, MATCH, PITCH, TEAM_COLORS } from './constants';
+import { CAR_COLORS, COLORS, FIXED_DT, MATCH, PITCH, TEAM_COLORS } from './constants';
 import { Input } from './Input';
 import type { Difficulty, GameMode, Team } from './types';
 
@@ -46,6 +46,7 @@ export class Game {
   private mode: GameMode = '1v1';
   phase: Phase = 'idle';
   paused = false;
+  awayColor: number = TEAM_COLORS[1];
 
   private scores: [number, number] = [0, 0];
   private timeLeft = MATCH.durationSec;
@@ -73,13 +74,18 @@ export class Game {
     this.golden = false;
     this.clearUnits();
 
+    // Your whole team shares your color; the away team always gets a clearly
+    // different palette color.
+    this.awayColor = pickAwayColor(playerColor);
+    const teamColor = [playerColor, this.awayColor];
+
     const perTeam = mode === '2v2' ? 2 : 1;
     for (let t = 0 as Team; t <= 1; t = (t + 1) as Team) {
       for (let i = 0; i < perTeam; i++) {
         const isPlayer = t === 0 && i === 0;
-        const color = isPlayer ? playerColor : TEAM_COLORS[t];
+        const color = teamColor[t];
         const car = new Car(t, color, isPlayer);
-        const view = new CarView(color);
+        const view = new CarView(color, isPlayer);
         this.scene.scene.add(view.group);
         const unit: Unit = { car, view };
         if (!isPlayer) {
@@ -326,4 +332,29 @@ export class Game {
     this.scene.update(dt);
     this.scene.render();
   }
+}
+
+// Pick the palette car color most visually distinct from the player's, so the
+// away team is never the same (or confusingly close to) your color.
+function pickAwayColor(player: number): number {
+  let best: number = CAR_COLORS[0];
+  let bestD = -1;
+  for (const c of CAR_COLORS) {
+    const d = colorDist(c, player);
+    if (d > bestD) {
+      bestD = d;
+      best = c;
+    }
+  }
+  return best;
+}
+
+function colorDist(a: number, b: number): number {
+  const ar = (a >> 16) & 255;
+  const ag = (a >> 8) & 255;
+  const ab = a & 255;
+  const br = (b >> 16) & 255;
+  const bg = (b >> 8) & 255;
+  const bb = b & 255;
+  return (ar - br) ** 2 + (ag - bg) ** 2 + (ab - bb) ** 2;
 }

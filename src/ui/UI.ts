@@ -1,4 +1,4 @@
-import { CAR_COLORS, MATCH, TEAM_COLORS } from '../core/constants';
+import { CAR_COLORS, MATCH } from '../core/constants';
 import type { Game } from '../core/Game';
 import type { Difficulty, GameMode, Team } from '../core/types';
 import { saveSettings, settings } from '../state/Store';
@@ -272,7 +272,7 @@ export class UI {
       <span class="score-num">${a}</span>
       <span class="score-sep">–</span>
       <span class="score-num">${b}</span>
-      <span class="team-pip" style="background:${hex(TEAM_COLORS[1])}"></span>`;
+      <span class="team-pip" style="background:${hex(this.game.awayColor)}"></span>`;
   }
 
   private flashBanner(text: string, hot = false) {
