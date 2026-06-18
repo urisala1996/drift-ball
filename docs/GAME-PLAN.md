@@ -24,7 +24,7 @@ Requirements:
 |------|----------|
 | Opponents | AI bots only (1v1 & 2v2), 3 difficulty levels. No online/multiplayer. |
 | Controls | Virtual joystick (steer/throttle) + boost button; brake/reverse button. Ball moved by ramming (no kick button). Keyboard fallback on desktop. |
-| Ball | **Player never controls the ball.** It's a pure-physics object — moved only by collisions with cars/walls, with a little bounce. **Sized like a car** (big chunky ball, not a small soccer ball). |
+| Ball | **Player never controls the ball.** Pure-physics object — moved only by collisions with cars/walls. **Sized like a car** (big chunky ball). Has **real low vertical bounces** (3D: gravity + floor restitution, low arcs, can sail over a low car). Car↔ball mass ratio left as a **tunable** (dialed in during milestone 4). |
 | Stack | Three.js + TypeScript + Vite |
 | Deploy | GitHub Pages (static `dist/`), via GitHub Actions or `gh-pages` branch |
 | Win rule | First to 3 goals, or higher score at 5:00; tie → golden goal (hard cap ~90s → draw) |
@@ -52,7 +52,8 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
 - **Two goals** at the short ends. Because the ball is car-sized, goals are **generously wide
   and tall** (mouth comfortably bigger than the ball — roughly 2–2.5× ball diameter wide):
   gold `#ffd93d` posts + hot-pink `#ff3d6e` goal-line glow + suggested back net (thin unlit
-  bars). A goal-trigger volume sits behind each line.
+  bars). A goal-trigger volume sits behind each line and is **tall enough to catch a ball
+  arriving on a low bounce** (crossbar set above the ball's typical arc apex).
 - **Perimeter walls** (reuse obstacle "wall" style) keep the ball in play — ball/cars bounce
   off them. Walls are bouncier for the ball than for cars so rebounds stay lively.
 - Pitch is **scaled up to suit the big ball** — long enough that a car-sized ball doesn't
@@ -67,9 +68,12 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
   big, chunky, lightweight ball, not a small soccer ball. It reads as a hero object from the
   top-down ortho view.
 - Low-poly faceted icosphere with a bright unlit/emissive-feel material so it glows like the
-  kerbs. **A little bouncy:** high restitution off cars and walls, subtle squash-and-stretch
-  and a small vertical hop on hard hits for juice (gameplay stays planar). Spins/rolls from
-  the impulse direction; cream dust puff on hard hits, pink-tinted on a boosted ram.
+  kerbs. **Real but low bounces:** the ball has full 3D motion — gravity pulls it down and it
+  bounces off the floor with restitution, producing **low arcs** that can sail over a low car.
+  Arcs are kept deliberately low so the ball stays readable from the top-down ortho view and
+  defensible. High restitution off cars and walls too; squash-and-stretch on impacts, a soft
+  shadow/marker under an airborne ball so its ground position stays clear. Spins/rolls from the
+  impulse direction; cream dust puff on hard hits, pink-tinted on a boosted ram.
 
 ---
 
@@ -97,13 +101,18 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
 - Forward/lateral velocity split + **grip** coefficient for arcade drift.
 - **Mass-based impulse collisions** for car↔car and car↔ball; restitution tuned so the
   car-sized ball *pops* off the car. Minimum approach speed so slow nudges still move the ball.
-- **Ball is pure physics, never player-driven.** Car-sized but **low mass** so cars throw it
-  around easily; **high restitution / "bouncy"** off cars and walls; rolling/air friction so
-  it settles; capped max speed to stay readable. Tune so a car-sized ball ricochets lively but
-  doesn't fly across the whole pitch in one hit.
-- **No vertical mechanics for cars** — remove ramps/jumps/pits/fall-off/tumble; cars stay on
-  the plane (honors "no jump, no fly"). The **ball may take a small vertical hop** on hard
-  impacts purely as juice (squash-and-stretch), but gameplay logic treats it as planar.
+- **Ball is pure physics, never player-driven.** Car-sized; **car↔ball mass ratio is a tunable
+  parameter** (dialed in during milestone 4 — start light so cars throw it around, adjust by
+  feel). **High restitution / "bouncy"** off cars and walls; rolling/air friction so it
+  settles; capped speed to stay readable. Tune so it ricochets lively but doesn't cross the
+  whole pitch in one hit.
+- **Ball has real 3D motion (low bounces).** Gravity acts on the ball and it bounces off the
+  floor with restitution, giving **low arcs** that can sail over a low car. Car↔ball collisions
+  are resolved in 3D (the ball's height matters — a car only strikes the ball when their bodies
+  actually overlap in height), so balls can pass over or be struck low. Vertical bounce
+  restitution and gravity are tuned to keep arcs **low and brief**, not Rocket-League-aerial.
+- **Cars remain strictly planar** — no ramps/jumps/pits/fall-off/tumble, cars never leave the
+  ground (honors "no jump, no fly"). Only the *ball* uses the vertical axis.
 - Boost = bounded forward acceleration with cooldown/regen.
 - Fixed-timestep physics (~60 Hz accumulator) decoupled from render for determinism.
 
@@ -113,7 +122,9 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
 
 - **Behavior:** lightweight per-bot state machine — *Chase ball → Position to strike toward
   enemy goal → Defend own goal when ball is on our half → Recover/return*. Aim at a strike
-  point behind the ball relative to the target goal; boost when far/clear.
+  point behind the ball relative to the target goal; boost when far/clear. Bots target the
+  ball's **ground (projected) position** and account for low bounces — when the ball is
+  airborne they move to its predicted landing spot rather than chasing thin air.
 - **Difficulty knobs:** reaction delay, aim error, prediction lookahead, boost frequency.
 - **2v2 roles:** attacker/defender split with rotation so bots don't stack on the ball.
 - Bots feed the **same control vector** (joystick dir + boost/brake flags) as the player → one
@@ -166,9 +177,9 @@ drift-ball/
    │  ├─ Car.ts              # stacked-box car factory + cosmetics + brake lights/aura
    │  └─ Ball.ts             # glowing car-sized icosphere + spin + squash/bounce juice
    ├─ physics/
-   │  ├─ World.ts            # integrator, grip/drift split, collisions, walls
-   │  ├─ collide.ts          # car↔car, car↔ball, car/ball↔wall impulse resolution
-   │  └─ goal.ts             # goal-line trigger detection
+   │  ├─ World.ts            # integrator: planar cars + 3D ball (gravity, floor bounce), walls
+   │  ├─ collide.ts          # car↔car, 3D car↔ball (height-aware), car/ball↔wall impulses
+   │  └─ goal.ts             # goal volume trigger (height-aware, catches low-bounce shots)
    ├─ ai/Bot.ts              # state machine producing the same control vector
    ├─ fx/
    │  ├─ Particles.ts        # pooled cream/pink/gold dust puffs
@@ -220,8 +231,9 @@ matching art doc tokens; pixel ratio capped at 2, AA on, shadows desktop-only.
 
 - **Local:** `npm run dev`; test desktop (keyboard) and touch (device/responsive). Confirm
   joystick steers, boost bursts, ramming moves the ball, goals score + reset, timer/best-of-3
-  end correctly, golden goal on tie, pause on tab blur, settings/car persist, no vertical/jump
-  behavior ever.
+  end correctly, golden goal on tie, pause on tab blur, settings/car persist. Confirm **cars
+  never leave the ground** (no jump/fly) while the **ball does bounce in low arcs** and can
+  sail over a low car; low-bounce shots into the goal still score.
 - **AI:** each difficulty in 1v1 & 2v2 — bots chase, shoot the correct goal, defend, don't
   stack in 2v2.
 - **Performance:** 60fps + capped pixel ratio on a mid phone; shadows off on touch.
