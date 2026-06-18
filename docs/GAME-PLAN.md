@@ -24,6 +24,7 @@ Requirements:
 |------|----------|
 | Opponents | AI bots only (1v1 & 2v2), 3 difficulty levels. No online/multiplayer. |
 | Controls | Virtual joystick (steer/throttle) + boost button; brake/reverse button. Ball moved by ramming (no kick button). Keyboard fallback on desktop. |
+| Ball | **Player never controls the ball.** It's a pure-physics object — moved only by collisions with cars/walls, with a little bounce. **Sized like a car** (big chunky ball, not a small soccer ball). |
 | Stack | Three.js + TypeScript + Vite |
 | Deploy | GitHub Pages (static `dist/`), via GitHub Actions or `gh-pages` branch |
 | Win rule | First to 3 goals, or higher score at 5:00; tie → golden goal (hard cap ~90s → draw) |
@@ -48,16 +49,27 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
 **Arena (re-themed from the ring)**
 - Fixed **rounded-rectangle pitch** (extruded slab) floating in the dusk void; same kerb /
   edge-line / center-mark treatment as the ring.
-- **Two goals** at the short ends: gold `#ffd93d` posts + hot-pink `#ff3d6e` goal-line glow +
-  suggested back net (thin unlit bars). A goal-trigger volume sits behind each line.
+- **Two goals** at the short ends. Because the ball is car-sized, goals are **generously wide
+  and tall** (mouth comfortably bigger than the ball — roughly 2–2.5× ball diameter wide):
+  gold `#ffd93d` posts + hot-pink `#ff3d6e` goal-line glow + suggested back net (thin unlit
+  bars). A goal-trigger volume sits behind each line.
 - **Perimeter walls** (reuse obstacle "wall" style) keep the ball in play — ball/cars bounce
-  with modest restitution.
+  off them. Walls are bouncier for the ball than for cars so rebounds stay lively.
+- Pitch is **scaled up to suit the big ball** — long enough that a car-sized ball doesn't
+  cross it in one shove, with room for cars to maneuver around it.
 - Floor tinted to distinguish the pitch (e.g. green-tinted disc per art doc map identity).
 
-**The ball (new hero object)**
+**The ball (new hero object) — pure physics, car-sized**
+- **The player never controls the ball.** There is no possession, no assist, no kick — the
+  ball moves *only* as a result of physics collisions (car↔ball, ball↔wall) plus a little
+  bounce. The entire game verb is "position your car and ram the ball."
+- **Size:** roughly the **dimensions of a car** (diameter ≈ car length, ~3.5–4.5 units) — a
+  big, chunky, lightweight ball, not a small soccer ball. It reads as a hero object from the
+  top-down ortho view.
 - Low-poly faceted icosphere with a bright unlit/emissive-feel material so it glows like the
-  kerbs — readable from the top-down ortho view. Subtle bob/spin; cream dust puff on hard
-  hits, pink-tinted on a boosted ram.
+  kerbs. **A little bouncy:** high restitution off cars and walls, subtle squash-and-stretch
+  and a small vertical hop on hard hits for juice (gameplay stays planar). Spins/rolls from
+  the impulse direction; cream dust puff on hard hits, pink-tinted on a boosted ram.
 
 ---
 
@@ -70,8 +82,10 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
   Purely planar — no jump/flight.
 - **Brake / reverse:** secondary right-side button; hold past ~0.8s engages reverse. Brake
   increases lateral scrub for brake-slides.
-- **Ball interaction:** purely physical — **no kick button**. Move/pass/shoot by ramming with
-  the car body (mass + restitution). Boosting into the ball shoots it harder.
+- **Ball interaction:** purely physical — **no kick button, no ball control whatsoever**. The
+  ball only ever responds to collisions. You move/pass/shoot it by ramming with the car body
+  (mass + restitution); boosting into it shoots it harder. All "skill" is in positioning and
+  angles, not in any ball input.
 - **Desktop fallback:** WASD/arrows steer, Shift = boost, Space = brake. Same physics.
 - On-screen controls: thumb-anchored, large, translucent glass (art doc §9), **hidden on
   desktop**. Left/right-handed swap in settings.
@@ -81,11 +95,15 @@ themed from a shrinking ring to a **rectangular pitch with two goals**.
 ## 3. Physics & feel (reuse sumo model, retuned)
 
 - Forward/lateral velocity split + **grip** coefficient for arcade drift.
-- **Mass-based impulse collisions** for car↔car and car↔ball; restitution tuned so the ball
-  *pops* off the car. Minimum approach speed so slow nudges still move the ball.
-- Ball: rolling friction + wall restitution; capped max speed to stay controllable.
-- **No vertical mechanics** — remove ramps/jumps/pits/fall-off/tumble. Everything stays on the
-  plane (honors "no jump, no fly"). Cars never leave the ground.
+- **Mass-based impulse collisions** for car↔car and car↔ball; restitution tuned so the
+  car-sized ball *pops* off the car. Minimum approach speed so slow nudges still move the ball.
+- **Ball is pure physics, never player-driven.** Car-sized but **low mass** so cars throw it
+  around easily; **high restitution / "bouncy"** off cars and walls; rolling/air friction so
+  it settles; capped max speed to stay readable. Tune so a car-sized ball ricochets lively but
+  doesn't fly across the whole pitch in one hit.
+- **No vertical mechanics for cars** — remove ramps/jumps/pits/fall-off/tumble; cars stay on
+  the plane (honors "no jump, no fly"). The **ball may take a small vertical hop** on hard
+  impacts purely as juice (squash-and-stretch), but gameplay logic treats it as planar.
 - Boost = bounded forward acceleration with cooldown/regen.
 - Fixed-timestep physics (~60 Hz accumulator) decoupled from render for determinism.
 
@@ -146,7 +164,7 @@ drift-ball/
    │  ├─ Scene.ts            # ortho camera, sun+ambient, fog, background hills/rocks
    │  ├─ Arena.ts            # pitch slab, walls, goals, kerb/edge/center
    │  ├─ Car.ts              # stacked-box car factory + cosmetics + brake lights/aura
-   │  └─ Ball.ts             # glowing icosphere + spin/bob
+   │  └─ Ball.ts             # glowing car-sized icosphere + spin + squash/bounce juice
    ├─ physics/
    │  ├─ World.ts            # integrator, grip/drift split, collisions, walls
    │  ├─ collide.ts          # car↔car, car↔ball, car/ball↔wall impulse resolution
