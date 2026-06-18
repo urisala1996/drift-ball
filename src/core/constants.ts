@@ -37,7 +37,7 @@ export const CAR_COLORS = [0xff8e3c, 0x3ddbb4, 0xff3d6e, 0x6c5ce7, 0xffd93d] as 
 export const PITCH = {
   halfX: 34,
   halfZ: 47,
-  wallHeight: 6,
+  wallHeight: 1.2, // low boards: cars sit clearly above them (no occlusion)
   goalHalfWidth: 11, // opening is 22 wide (~2x ball diameter)
   goalHeight: 10,
   goalDepth: 6,

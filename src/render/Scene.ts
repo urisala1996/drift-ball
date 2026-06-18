@@ -17,9 +17,9 @@ export class Scene {
   private orbitAngle = 0;
   private zoom = 1; // dolly factor so narrow viewports still see the whole pitch
 
-  // Broadcast placement: behind the -X sideline, elevated, tilted ~30° down.
-  private static readonly BACK = 78;
-  private static readonly HEIGHT = 42;
+  // Broadcast placement: behind the -X sideline, elevated, tilted ~36° down.
+  private static readonly BACK = 74;
+  private static readonly HEIGHT = 54;
   private static readonly LOOK_LIFT = 3;
 
   constructor(canvas: HTMLCanvasElement) {
