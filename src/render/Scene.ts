@@ -1,22 +1,26 @@
 import * as THREE from 'three';
-import { COLORS, PITCH } from '../core/constants';
+import { COLORS } from '../core/constants';
 
 const isTouch = matchMedia('(pointer: coarse)').matches;
 
-// Orthographic, high three-quarter top-down view per docs/ART-DIRECTION.md.
+// FIFA-style broadcast camera: a perspective view from high above one sideline,
+// tilted down across the pitch (goals left/right), softly tracking the action.
+// This intentionally departs from the art-doc's orthographic spec to get the
+// "TV game" feel the design now calls for.
 export class Scene {
   readonly scene = new THREE.Scene();
-  readonly camera: THREE.OrthographicCamera;
+  readonly camera: THREE.PerspectiveCamera;
   readonly renderer: THREE.WebGLRenderer;
 
-  private halfHeight = 78;
   private target = new THREE.Vector3(0, 0, 0);
-  // High, lightly-tilted view looking down the long axis: goals sit left/right
-  // and the whole pitch is visible.
-  private static readonly GAMEPLAY_OFFSET = new THREE.Vector3(2.0, 3.4, 0).normalize();
-  private camOffset = Scene.GAMEPLAY_OFFSET.clone();
-  private orbitAngle = 0;
   private orbit = true; // menu idle orbit
+  private orbitAngle = 0;
+  private zoom = 1; // dolly factor so narrow viewports still see the whole pitch
+
+  // Broadcast placement: behind the -X sideline, elevated, tilted ~30° down.
+  private static readonly BACK = 78;
+  private static readonly HEIGHT = 42;
+  private static readonly LOOK_LIFT = 3;
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -25,14 +29,14 @@ export class Scene {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene.background = new THREE.Color(COLORS.sky);
-    this.scene.fog = new THREE.Fog(COLORS.sky, 160, 340);
+    this.scene.fog = new THREE.Fog(COLORS.sky, 180, 420);
 
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
-    this.positionCamera();
+    this.camera = new THREE.PerspectiveCamera(42, 1, 0.5, 2000);
 
     this.addLights();
     this.addBackdrop();
     this.resize();
+    this.positionCamera();
     addEventListener('resize', () => this.resize());
   }
 
@@ -59,20 +63,20 @@ export class Scene {
   private addBackdrop() {
     // deep floor far below
     const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(900, 900),
+      new THREE.PlaneGeometry(1400, 1400),
       new THREE.MeshBasicMaterial({ color: COLORS.deepFloor }),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -30;
     this.scene.add(floor);
 
-    // ring of hills (cones)
+    // ring of hills (cones) — read as distant stadium surroundings on the horizon
     const hillMat = new THREE.MeshLambertMaterial({ color: COLORS.hills });
-    for (let i = 0; i < 26; i++) {
-      const a = (i / 26) * Math.PI * 2;
-      const r = 230 + Math.random() * 60;
-      const h = 30 + Math.random() * 50;
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(20 + Math.random() * 30, h, 6), hillMat);
+    for (let i = 0; i < 30; i++) {
+      const a = (i / 30) * Math.PI * 2;
+      const r = 260 + Math.random() * 70;
+      const h = 36 + Math.random() * 60;
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(24 + Math.random() * 34, h, 6), hillMat);
       cone.position.set(Math.cos(a) * r, h / 2 - 28, Math.sin(a) * r);
       this.scene.add(cone);
     }
@@ -81,42 +85,54 @@ export class Scene {
     const rockMat = new THREE.MeshLambertMaterial({ color: COLORS.rocks });
     for (let i = 0; i < 18; i++) {
       const a = Math.random() * Math.PI * 2;
-      const r = 150 + Math.random() * 120;
+      const r = 170 + Math.random() * 130;
       const s = 3 + Math.random() * 6;
       const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(s), rockMat);
-      rock.position.set(Math.cos(a) * r, 6 + Math.random() * 30, Math.sin(a) * r);
+      rock.position.set(Math.cos(a) * r, 8 + Math.random() * 34, Math.sin(a) * r);
       this.scene.add(rock);
     }
   }
 
   setOrbit(on: boolean) {
     this.orbit = on;
-    if (!on) {
-      // restore the canonical gameplay framing
-      this.camOffset.copy(Scene.GAMEPLAY_OFFSET);
-      this.positionCamera();
-    }
+    this.positionCamera();
   }
 
-  // Soft-follow the centroid of the action during play.
+  // Soft-follow the centroid of the action during play (mostly horizontal pan).
   follow(cx: number, cz: number, dt: number) {
     if (this.orbit) return;
-    this.target.x += (cx - this.target.x) * Math.min(1, dt * 2.5);
-    this.target.z += (cz - this.target.z) * Math.min(1, dt * 2.5);
+    const k = Math.min(1, dt * 2.5);
+    // clamp so a goal never pans fully out of frame
+    const tz = Math.max(-20, Math.min(20, cz));
+    const tx = Math.max(-10, Math.min(10, cx));
+    this.target.z += (tz - this.target.z) * k;
+    this.target.x += (tx - this.target.x) * k;
     this.positionCamera();
   }
 
   private positionCamera() {
-    const dist = 140;
-    this.camera.position.copy(this.target).addScaledVector(this.camOffset, dist);
-    this.camera.lookAt(this.target);
+    if (this.orbit) {
+      const R = 96;
+      const H = 64;
+      this.camera.position.set(
+        this.target.x + Math.cos(this.orbitAngle) * R,
+        H,
+        this.target.z + Math.sin(this.orbitAngle) * R,
+      );
+      this.camera.lookAt(this.target.x, this.target.y, this.target.z);
+    } else {
+      this.camera.position.set(
+        this.target.x - Scene.BACK * this.zoom,
+        Scene.HEIGHT * this.zoom,
+        this.target.z,
+      );
+      this.camera.lookAt(this.target.x, this.target.y + Scene.LOOK_LIFT, this.target.z);
+    }
   }
 
   update(dt: number) {
     if (this.orbit) {
       this.orbitAngle += dt * 0.06;
-      const r = 1;
-      this.camOffset.set(Math.cos(this.orbitAngle) * r, 1.18, Math.sin(this.orbitAngle) * r).normalize();
       this.positionCamera();
     }
   }
@@ -125,15 +141,11 @@ export class Scene {
     const w = innerWidth;
     const h = innerHeight;
     this.renderer.setSize(w, h);
-    const aspect = w / h;
-    // Fit the pitch with the long axis (Z) running horizontally across screen.
-    const needed = Math.max(PITCH.halfX + 10, (PITCH.halfZ + 10) / aspect);
-    this.halfHeight = needed;
-    this.camera.top = this.halfHeight;
-    this.camera.bottom = -this.halfHeight;
-    this.camera.left = -this.halfHeight * aspect;
-    this.camera.right = this.halfHeight * aspect;
+    this.camera.aspect = w / h;
+    // dolly back on narrow/portrait viewports so the whole pitch width fits
+    this.zoom = Math.max(1, 1.85 / this.camera.aspect);
     this.camera.updateProjectionMatrix();
+    this.positionCamera();
   }
 
   // Map a screen-space joystick vector (jx right+, jy up+) to a world ground
