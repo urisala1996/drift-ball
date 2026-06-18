@@ -54,6 +54,8 @@ export class Game {
   private golden = false;
   private acc = 0;
   private prevCountInt = -1;
+  private fxNetZ = 0;
+  private fxTimer = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.scene = new Scene(canvas);
@@ -172,6 +174,11 @@ export class Game {
 
     if (this.phase === 'goal') {
       this.celebrate -= dt;
+      this.fxTimer -= dt;
+      if (this.fxTimer <= 0) {
+        this.fireworks();
+        this.fxTimer = 0.28;
+      }
       if (this.celebrate <= 0) this.afterGoal();
       return;
     }
@@ -247,7 +254,11 @@ export class Game {
     this.events.onScore?.(this.scores[0], this.scores[1]);
     this.events.onGoal?.(team);
     this.audio.goal();
-    this.particles.burst(this.ball.x, this.ball.z, COLORS.goalGlow, 12, 1.4);
+    // fireworks at the net that was scored on
+    this.fxNetZ = team === 0 ? PITCH.halfZ : -PITCH.halfZ;
+    this.fireworks();
+    this.fireworks();
+    this.fxTimer = 0.25;
 
     if (this.golden || this.scores[team] >= MATCH.goalsToWin) {
       this.endMatch();
@@ -259,6 +270,16 @@ export class Game {
 
   private afterGoal() {
     this.beginKickoff();
+  }
+
+  private fireworks() {
+    const cols = [0xffd93d, 0xff3d6e, 0x3ddbb4, 0xff8e3c, 0xf5ead7];
+    for (let i = 0; i < 2; i++) {
+      const x = (Math.random() * 2 - 1) * PITCH.goalHalfWidth;
+      const y = 4 + Math.random() * 6;
+      const c = cols[Math.floor(Math.random() * cols.length)];
+      this.particles.firework(x, y, this.fxNetZ, c, 10);
+    }
   }
 
   private handleTimeUp() {

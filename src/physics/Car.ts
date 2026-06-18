@@ -88,12 +88,18 @@ export class Car {
       throttle = input.throttle;
     }
 
+    // Boost also acts as a "drive forward" command: pressing boost with no
+    // joystick accelerates the car along its current facing (great for kickoff).
+    if (input.boost && !input.brake) {
+      throttle = Math.max(throttle, 1);
+    }
+
     // ease steering toward target
     this.steer += (targetSteer - this.steer) * Math.min(1, CAR.steerEase * dt);
 
     // steering authority scales with speed, but keep a baseline so the car
     // still responds when slow (more controllable).
-    const speedNorm = 0.45 + 0.55 * Math.min(1, this.speed / 9);
+    const speedNorm = 0.45 + 0.55 * Math.min(1, this.speed / 7);
     this.yaw += this.steer * CAR.turnRate * speedNorm * dt;
 
     // --- reverse handling ---

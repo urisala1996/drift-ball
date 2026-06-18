@@ -9,10 +9,12 @@ export class CarView {
   private brakeLights: THREE.Mesh[] = [];
 
   constructor(color: number) {
-    const body = new THREE.Mesh(
-      new THREE.BoxGeometry(CAR.bodyW, CAR.bodyH, CAR.bodyL),
-      new THREE.MeshLambertMaterial({ color }),
-    );
+    // Self-emissive keeps the neon body color true under the cool purple ambient.
+    const bodyMat = new THREE.MeshLambertMaterial({
+      color,
+      emissive: new THREE.Color(color).multiplyScalar(0.28),
+    });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(CAR.bodyW, CAR.bodyH, CAR.bodyL), bodyMat);
     body.position.y = 0.7;
     body.castShadow = true;
     this.group.add(body);
@@ -26,10 +28,7 @@ export class CarView {
     this.group.add(cabin);
 
     // spoiler
-    const spoiler = new THREE.Mesh(
-      new THREE.BoxGeometry(CAR.bodyW, 0.15, 0.5),
-      new THREE.MeshLambertMaterial({ color }),
-    );
+    const spoiler = new THREE.Mesh(new THREE.BoxGeometry(CAR.bodyW, 0.15, 0.5), bodyMat);
     spoiler.position.set(0, 1.25, -CAR.bodyL / 2 + 0.2);
     this.group.add(spoiler);
 

@@ -19,8 +19,8 @@ export const COLORS = {
   goalGlow: 0xff3d6e,
   wall: 0x4a3d85,
   wallCap: 0xff3d6e,
-  ball: 0xffd93d, // gold hero ball (on-palette, reads as "the thing that matters")
-  ballGlow: 0xff8e3c,
+  ball: 0xf5ead7, // warm off-white "paper" (on-palette)
+  ballGlow: 0xffd9a0, // warm cream glow
   ambient: 0x8877cc,
   sun: 0xffd9a0,
   dust: 0xf5ead7,
@@ -52,12 +52,12 @@ export const CAR = {
   radius: 2.7, // collision radius (horizontal)
   topHeight: 2.6, // top of car for height-aware ball strikes
   mass: 1.0,
-  accel: 38,
-  maxSpeed: 31,
-  boostAccel: 50,
-  boostMaxSpeed: 45,
-  reverseSpeed: 17,
-  turnRate: 3.5, // rad/s at full authority
+  accel: 26,
+  maxSpeed: 23,
+  boostAccel: 38,
+  boostMaxSpeed: 34,
+  reverseSpeed: 14,
+  turnRate: 3.4, // rad/s at full authority
   steerEase: 12, // how fast steering eases to target (snappier)
   grip: 5.2, // lateral velocity bleed (lower = more responsive turn-in)
   brakeGrip: 2.4, // grip while braking (lower = more scrub)

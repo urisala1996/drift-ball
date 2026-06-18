@@ -23,7 +23,6 @@ export class UI {
   private root: HTMLElement;
   private screens = new Map<string, HTMLElement>();
   private current = '';
-  private pendingMode: GameMode = '1v1';
   private activeMode: GameMode = '1v1';
 
   // HUD elements
@@ -69,7 +68,6 @@ export class UI {
   private buildScreens() {
     this.add('title', this.titleScreen());
     this.add('mode', this.modeScreen());
-    this.add('difficulty', this.difficultyScreen());
     this.add('garage', this.garageScreen());
     this.add('settings', this.settingsScreen());
     this.add('howto', this.howtoScreen());
@@ -103,39 +101,15 @@ export class UI {
     const p = this.panel('SELECT MODE');
     const row = el('div', 'choices');
     row.appendChild(
-      this.bigChoice('1v1', 'You vs one bot', () => {
-        this.pendingMode = '1v1';
-        this.show('difficulty');
-      }),
+      this.bigChoice('1v1', 'You vs one bot', () => this.startMatch('1v1', settings.difficulty)),
     );
     row.appendChild(
-      this.bigChoice('2v2', 'You + bot vs two bots', () => {
-        this.pendingMode = '2v2';
-        this.show('difficulty');
-      }),
+      this.bigChoice('2v2', 'You + bot vs two bots', () =>
+        this.startMatch('2v2', settings.difficulty),
+      ),
     );
     p.appendChild(row);
     p.appendChild(this.btn('BACK', 'ghost', () => this.show('title')));
-    s.appendChild(p);
-    return s;
-  }
-
-  private difficultyScreen() {
-    const s = el('div', 'center');
-    const p = this.panel('DIFFICULTY');
-    const row = el('div', 'choices');
-    const diffs: Difficulty[] = ['easy', 'normal', 'hard'];
-    for (const d of diffs) {
-      row.appendChild(
-        this.bigChoice(d.toUpperCase(), '', () => {
-          settings.difficulty = d;
-          saveSettings();
-          this.startMatch(this.pendingMode, d);
-        }),
-      );
-    }
-    p.appendChild(row);
-    p.appendChild(this.btn('BACK', 'ghost', () => this.show('mode')));
     s.appendChild(p);
     return s;
   }
@@ -211,6 +185,19 @@ export class UI {
     });
     handRow.appendChild(hand);
     p.appendChild(handRow);
+
+    // difficulty (cycles easy → normal → hard)
+    const diffs: Difficulty[] = ['easy', 'normal', 'hard'];
+    const diffRow = el('div', 'setting-row');
+    diffRow.appendChild(el('span', 'label', 'DIFFICULTY'));
+    const diffBtn = this.btn(settings.difficulty.toUpperCase(), 'small', () => {
+      const next = diffs[(diffs.indexOf(settings.difficulty) + 1) % diffs.length];
+      settings.difficulty = next;
+      diffBtn.textContent = next.toUpperCase();
+      saveSettings();
+    });
+    diffRow.appendChild(diffBtn);
+    p.appendChild(diffRow);
 
     p.appendChild(this.btn('BACK', 'ghost', () => this.show('title')));
     s.appendChild(p);

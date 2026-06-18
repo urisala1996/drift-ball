@@ -11,7 +11,10 @@ export class Scene {
 
   private halfHeight = 78;
   private target = new THREE.Vector3(0, 0, 0);
-  private camOffset = new THREE.Vector3(48, 56, 48).normalize();
+  // High, lightly-tilted view looking down the long axis: goals sit left/right
+  // and the whole pitch is visible.
+  private static readonly GAMEPLAY_OFFSET = new THREE.Vector3(2.0, 3.4, 0).normalize();
+  private camOffset = Scene.GAMEPLAY_OFFSET.clone();
   private orbitAngle = 0;
   private orbit = true; // menu idle orbit
 
@@ -89,8 +92,8 @@ export class Scene {
   setOrbit(on: boolean) {
     this.orbit = on;
     if (!on) {
-      // restore the canonical 45° three-quarter framing for gameplay
-      this.camOffset.set(48, 56, 48).normalize();
+      // restore the canonical gameplay framing
+      this.camOffset.copy(Scene.GAMEPLAY_OFFSET);
       this.positionCamera();
     }
   }
@@ -123,8 +126,8 @@ export class Scene {
     const h = innerHeight;
     this.renderer.setSize(w, h);
     const aspect = w / h;
-    // Fit the pitch: ensure both axes are visible (tight padding = bigger cars).
-    const needed = Math.max(PITCH.halfZ + 8, (PITCH.halfX + 8) / aspect);
+    // Fit the pitch with the long axis (Z) running horizontally across screen.
+    const needed = Math.max(PITCH.halfX + 10, (PITCH.halfZ + 10) / aspect);
     this.halfHeight = needed;
     this.camera.top = this.halfHeight;
     this.camera.bottom = -this.halfHeight;
