@@ -123,8 +123,8 @@ export class Scene {
     const h = innerHeight;
     this.renderer.setSize(w, h);
     const aspect = w / h;
-    // Fit the pitch: ensure both axes are visible.
-    const needed = Math.max(PITCH.halfZ + 18, (PITCH.halfX + 18) / aspect);
+    // Fit the pitch: ensure both axes are visible (tight padding = bigger cars).
+    const needed = Math.max(PITCH.halfZ + 8, (PITCH.halfX + 8) / aspect);
     this.halfHeight = needed;
     this.camera.top = this.halfHeight;
     this.camera.bottom = -this.halfHeight;

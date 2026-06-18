@@ -91,8 +91,9 @@ export class Car {
     // ease steering toward target
     this.steer += (targetSteer - this.steer) * Math.min(1, CAR.steerEase * dt);
 
-    // steering authority scales with speed
-    const speedNorm = Math.min(1, this.speed / 12);
+    // steering authority scales with speed, but keep a baseline so the car
+    // still responds when slow (more controllable).
+    const speedNorm = 0.45 + 0.55 * Math.min(1, this.speed / 9);
     this.yaw += this.steer * CAR.turnRate * speedNorm * dt;
 
     // --- reverse handling ---
