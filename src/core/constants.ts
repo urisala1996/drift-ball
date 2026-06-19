@@ -1,36 +1,37 @@
 // Central tuning + dimensions for DRIFT·BALL.
 // World units; the pitch is scaled up to suit a car-sized ball (see docs/GAME-PLAN.md).
 
-// ---- Palette (from docs/ART-DIRECTION.md) ----
+// ---- Palette: minimalist light mode (beige + whites + dark detail lines) ----
 export const COLORS = {
-  sky: 0x2a1e4f,
-  deepFloor: 0x1c1340,
-  hills: 0x3a2d6b,
-  rocks: 0x7a6aa8,
-  pitchTop: 0x3d3170, // dusk-violet disc (matches the art-direction palette)
-  pitchSkirt: 0x2b2150,
-  edgeLine: 0xf5ead7,
-  centerMark: 0xffd9a0,
-  kerbA: 0xf5ead7,
-  kerbB: 0xff3d6e,
-  cabin: 0x241a44,
-  brakeLight: 0xffe066,
-  goalPost: 0xffd93d,
-  goalGlow: 0xff3d6e,
-  wall: 0x4a3d85,
-  wallCap: 0xff3d6e,
-  ball: 0xf5ead7, // warm off-white "paper" (on-palette)
-  ballGlow: 0xffd9a0, // warm cream glow
-  ambient: 0x8877cc,
-  sun: 0xffd9a0,
-  dust: 0xf5ead7,
-  dustRam: 0xff3d6e,
-  dustBoost: 0xffd93d,
+  sky: 0xefe7d6, // warm light-beige background
+  deepFloor: 0xe3d8c2, // slightly darker beige far below
+  hills: 0xe6dcc8, // subtle light tan horizon
+  rocks: 0xd8cdb5, // light taupe
+  pitchTop: 0xfbf8f2, // near-white playing surface
+  pitchSkirt: 0xe8dfcc, // light beige skirt
+  edgeLine: 0x2b2a26, // dark detail lines
+  centerMark: 0x2b2a26,
+  kerbA: 0xfbf8f2,
+  kerbB: 0x2b2a26,
+  cabin: 0x2b2a26, // dark "glass"
+  brakeLight: 0xff3b30,
+  goalPost: 0x2b2a26, // dark minimalist goal frame
+  goalGlow: 0x9a9282, // soft neutral goal line
+  wall: 0xe8dfcc, // light boards
+  wallCap: 0x2b2a26, // dark cap line
+  ball: 0xffffff, // white ball
+  ballGlow: 0xe8dfcc,
+  ballEdge: 0x2b2a26, // dark facet lines on the ball
+  ambient: 0xffffff, // bright neutral fill
+  sun: 0xfff6e8, // soft warm-white sun
+  dust: 0xc9bfa8, // taupe dust (visible on beige)
+  dustRam: 0x9a8f78,
+  dustBoost: 0xf5b22d, // amber
 } as const;
 
-// Team / player slot colors (orange, mint, violet, gold)
-export const TEAM_COLORS = [0xff8e3c, 0x3ddbb4] as const;
-export const CAR_COLORS = [0xff8e3c, 0x3ddbb4, 0xff3d6e, 0x6c5ce7, 0xffd93d] as const;
+// Team / player slot colors — bright saturated (red, blue, green, amber, purple)
+export const TEAM_COLORS = [0xe23b3b, 0x2f6fed] as const;
+export const CAR_COLORS = [0xe23b3b, 0x2f6fed, 0x2eb872, 0xf5b22d, 0x8b5cf6] as const;
 
 // ---- Arena dimensions ----
 // Tighter, more arcade pitch so the chunky cars + ball fill the frame.

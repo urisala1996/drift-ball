@@ -11,19 +11,17 @@ export class BallView {
   private baseScale = 1;
 
   constructor() {
-    this.mesh = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(BALL.radius, 1),
-      new THREE.MeshBasicMaterial({ color: COLORS.ball }),
-    );
+    const ballGeo = new THREE.IcosahedronGeometry(BALL.radius, 1);
+    this.mesh = new THREE.Mesh(ballGeo, new THREE.MeshLambertMaterial({ color: COLORS.ball }));
     this.mesh.castShadow = true;
     this.group.add(this.mesh);
 
-    // faint glow shell
-    const glow = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(BALL.radius * 1.12, 1),
-      new THREE.MeshBasicMaterial({ color: COLORS.ballGlow, transparent: true, opacity: 0.18 }),
+    // dark facet lines so the white ball reads against the near-white pitch
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(ballGeo, 18),
+      new THREE.LineBasicMaterial({ color: COLORS.ballEdge }),
     );
-    this.mesh.add(glow);
+    this.mesh.add(edges);
 
     // ground shadow marker (separate, stays on the floor)
     this.shadow = new THREE.Mesh(

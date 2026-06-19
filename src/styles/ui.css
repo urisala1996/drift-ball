@@ -1,13 +1,14 @@
 :root {
-  --ink: #1b1230;
-  --paper: #f5ead7;
-  --sun: #ff8e3c;
-  --hot: #ff3d6e;
-  --mint: #3ddbb4;
-  --gold: #ffd93d;
-  --sky: #2a1e4f;
-  --panel: rgba(255, 255, 255, 0.08);
-  --panel-brd: rgba(255, 255, 255, 0.18);
+  --ink: #26241f; /* primary dark text + detail lines */
+  --paper: #fbf8f2; /* near-white surface */
+  --beige: #efe7d6;
+  --beige-d: #e3d8c2;
+  --accent: #e23b3b; /* red */
+  --accent2: #2f6fed; /* blue */
+  --green: #2eb872;
+  --amber: #f5b22d;
+  --panel: rgba(255, 255, 255, 0.62);
+  --panel-brd: rgba(38, 36, 31, 0.16);
   font-family: 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -25,8 +26,8 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--sky);
-  color: var(--paper);
+  background: var(--beige);
+  color: var(--ink);
   touch-action: none;
   overscroll-behavior: none;
 }
@@ -50,12 +51,12 @@ body {
   z-index: 10;
 }
 
-/* radial vignette over the 3D scene */
+/* very subtle edge darkening for depth (minimal in light mode) */
 #ui::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(13, 9, 28, 0.55) 100%);
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(38, 36, 31, 0.06) 100%);
   pointer-events: none;
 }
 
@@ -68,10 +69,10 @@ body {
   justify-content: center;
   overflow-y: auto;
   pointer-events: auto;
-  background: radial-gradient(ellipse at top, #43307a 0%, #150e2b 85%);
+  background: radial-gradient(ellipse at top, #ffffff 0%, #e7ddca 92%);
 }
 .screen.overlay {
-  background: rgba(12, 8, 26, 0.55);
+  background: rgba(247, 242, 232, 0.55);
   backdrop-filter: blur(4px);
 }
 .screen--active {
@@ -103,19 +104,19 @@ body {
   font-weight: 900;
   letter-spacing: -2px;
   margin: 0;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+  text-shadow: 0 4px 0 rgba(38, 36, 31, 0.12);
 }
 .logo .dot {
-  color: var(--sun);
+  color: var(--accent);
 }
 .logo .hot {
-  color: var(--hot);
+  color: var(--accent2);
 }
 .tagline {
   margin: -6px 0 10px;
   font-weight: 700;
   letter-spacing: 4px;
-  opacity: 0.7;
+  opacity: 0.6;
   font-size: 13px;
 }
 
@@ -131,7 +132,7 @@ body {
   min-width: min(440px, 88vw);
   max-width: 92vw;
   backdrop-filter: blur(8px);
-  border-top: 3px solid var(--sun);
+  border-top: 3px solid var(--accent);
 }
 .panel-title {
   margin: 0 0 6px;
@@ -141,10 +142,10 @@ body {
   font-size: clamp(20px, 4.5vmin, 28px);
 }
 .panel-title.win {
-  color: var(--mint);
+  color: var(--green);
 }
 .panel-title.lose {
-  color: var(--hot);
+  color: var(--accent);
 }
 
 /* ---------- buttons ---------- */
@@ -156,8 +157,8 @@ body {
   font-style: italic;
   letter-spacing: 2px;
   font-size: clamp(13px, 3.2vmin, 17px);
-  color: var(--paper);
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--panel-brd);
   border-radius: 14px;
   padding: clamp(9px, 1.9vmin, 14px) clamp(16px, 3vmin, 22px);
@@ -168,13 +169,13 @@ body {
   transform: scale(0.96);
 }
 .btn.primary {
-  background: var(--sun);
-  color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
   border-color: transparent;
 }
 .btn.ghost {
   background: transparent;
-  opacity: 0.75;
+  opacity: 0.65;
 }
 .btn.small {
   padding: 8px 16px;
@@ -203,10 +204,10 @@ body {
   justify-content: center;
   gap: 6px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.5);
   border: 1px solid var(--panel-brd);
   border-radius: 16px;
-  color: var(--paper);
+  color: var(--ink);
   cursor: pointer;
   font-family: inherit;
 }
@@ -217,18 +218,18 @@ body {
   font-size: clamp(22px, 5.5vmin, 30px);
   font-weight: 900;
   font-style: italic;
-  color: var(--gold);
+  color: var(--accent2);
 }
 .big-choice-sub {
   font-size: 12px;
   letter-spacing: 1px;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 .label {
   font-size: 12px;
   letter-spacing: 3px;
-  opacity: 0.7;
+  opacity: 0.65;
   font-weight: 700;
   margin: 0;
 }
@@ -253,9 +254,10 @@ body {
   border-radius: 14px;
   border: 3px solid transparent;
   cursor: pointer;
+  box-shadow: 0 0 0 1px var(--panel-brd) inset;
 }
 .swatch.selected {
-  border-color: var(--paper);
+  border-color: var(--ink);
   transform: scale(1.08);
 }
 
@@ -268,14 +270,14 @@ body {
 }
 .slider {
   flex: 1;
-  accent-color: var(--sun);
+  accent-color: var(--accent);
 }
 .toggle {
   width: 54px;
   height: 30px;
   border-radius: 16px;
   border: 1px solid var(--panel-brd);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(38, 36, 31, 0.12);
   position: relative;
   cursor: pointer;
 }
@@ -287,14 +289,15 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--paper);
+  background: var(--ink);
   transition: left 0.15s;
 }
 .toggle.on {
-  background: var(--mint);
+  background: var(--green);
 }
 .toggle.on::after {
   left: 27px;
+  background: var(--paper);
 }
 
 .howto {
@@ -306,7 +309,7 @@ body {
   margin: 0 0 10px;
 }
 .howto b {
-  color: var(--gold);
+  color: var(--accent);
 }
 
 /* ---------- HUD ---------- */
@@ -333,7 +336,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(12, 8, 26, 0.5);
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--panel-brd);
   padding: 8px 16px;
   border-radius: 14px;
@@ -351,19 +354,20 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--panel-brd) inset;
 }
 .timer {
   font-size: 24px;
   font-weight: 900;
   font-style: italic;
   letter-spacing: 1px;
-  background: rgba(12, 8, 26, 0.5);
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--panel-brd);
   padding: 6px 14px;
   border-radius: 12px;
 }
 .timer--low {
-  color: var(--hot);
+  color: var(--accent);
 }
 .pause-btn {
   pointer-events: auto;
@@ -379,14 +383,14 @@ body {
   width: min(220px, 50vw);
   height: 10px;
   border-radius: 6px;
-  background: rgba(12, 8, 26, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   border: 1px solid var(--panel-brd);
   overflow: hidden;
 }
 .boost-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--sun), var(--gold));
+  background: linear-gradient(90deg, var(--amber), var(--accent));
   transition: width 0.1s linear;
 }
 
@@ -400,12 +404,12 @@ body {
   font-weight: 900;
   font-style: italic;
   letter-spacing: 4px;
-  color: var(--paper);
-  text-shadow: 0 5px 0 rgba(0, 0, 0, 0.45);
+  color: var(--ink);
+  text-shadow: 0 5px 0 rgba(38, 36, 31, 0.14);
   opacity: 0;
 }
 .banner--hot {
-  color: var(--gold);
+  color: var(--accent);
 }
 .banner--show {
   animation: pop 0.85s ease-out;
@@ -478,7 +482,7 @@ body {
   width: 130px;
   height: 130px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.45);
   border: 2px solid var(--panel-brd);
   position: relative;
   touch-action: none;
@@ -491,8 +495,8 @@ body {
   height: 58px;
   margin: -29px 0 0 -29px;
   border-radius: 50%;
-  background: rgba(245, 234, 215, 0.85);
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  background: rgba(38, 36, 31, 0.82);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 .pad-btn {
   pointer-events: auto;
@@ -508,15 +512,15 @@ body {
   touch-action: none;
 }
 .pad-boost {
-  background: var(--sun);
+  background: var(--amber);
 }
 .pad-brake {
-  background: var(--hot);
+  background: var(--accent);
   color: var(--paper);
 }
 .pad-btn.held {
   transform: scale(0.92);
-  filter: brightness(1.2);
+  filter: brightness(1.08);
 }
 
 @media (pointer: fine) {
@@ -539,14 +543,14 @@ body {
     align-items: center;
     justify-content: center;
     gap: 14px;
-    background: radial-gradient(ellipse at top, #43307a 0%, #150e2b 85%);
-    color: var(--paper);
+    background: radial-gradient(ellipse at top, #ffffff 0%, #e7ddca 92%);
+    color: var(--ink);
     text-align: center;
     padding: 24px;
   }
   .rotate-icon {
     font-size: 72px;
-    color: var(--sun);
+    color: var(--accent);
     animation: spin 2.4s ease-in-out infinite;
   }
   .rotate-text {
@@ -558,7 +562,7 @@ body {
   .rotate-sub {
     font-size: 13px;
     letter-spacing: 2px;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 }
 @keyframes spin {

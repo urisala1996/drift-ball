@@ -287,7 +287,7 @@ export class Game {
   }
 
   private fireworks() {
-    const cols = [0xffd93d, 0xff3d6e, 0x3ddbb4, 0xff8e3c, 0xf5ead7];
+    const cols = [0xe23b3b, 0x2f6fed, 0x2eb872, 0xf5b22d, 0x8b5cf6];
     for (let i = 0; i < 2; i++) {
       const x = (Math.random() * 2 - 1) * PITCH.goalHalfWidth;
       const y = 4 + Math.random() * 6;

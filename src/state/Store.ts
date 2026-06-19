@@ -9,10 +9,10 @@ export interface Settings {
   control: ControlMode;
 }
 
-const KEY = 'driftball.settings.v1';
+const KEY = 'driftball.settings.v2';
 
 const DEFAULTS: Settings = {
-  carColor: 0xff8e3c,
+  carColor: 0xe23b3b,
   volume: 0.8,
   muted: false,
   handedness: 'right',

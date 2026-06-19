@@ -41,10 +41,10 @@ export class Scene {
   }
 
   private addLights() {
-    const amb = new THREE.AmbientLight(COLORS.ambient, 0.9);
+    const amb = new THREE.AmbientLight(COLORS.ambient, 0.72);
     this.scene.add(amb);
 
-    const sun = new THREE.DirectionalLight(COLORS.sun, 1.15);
+    const sun = new THREE.DirectionalLight(COLORS.sun, 0.62);
     sun.position.set(30, 55, 18);
     if (!isTouch) {
       sun.castShadow = true;

@@ -10,10 +10,10 @@ export class CarView {
   private marker?: THREE.Group;
 
   constructor(color: number, isPlayer = false) {
-    // Self-emissive keeps the neon body color true under the cool purple ambient.
+    // A touch of self-emissive keeps the bright body color saturated.
     const bodyMat = new THREE.MeshLambertMaterial({
       color,
-      emissive: new THREE.Color(color).multiplyScalar(0.28),
+      emissive: new THREE.Color(color).multiplyScalar(0.12),
     });
     const body = new THREE.Mesh(new THREE.BoxGeometry(CAR.bodyW, CAR.bodyH, CAR.bodyL), bodyMat);
     body.position.y = 0.7;
@@ -76,14 +76,14 @@ export class CarView {
     const m = new THREE.Group();
     const cone = new THREE.Mesh(
       new THREE.ConeGeometry(0.8, 1.3, 4),
-      new THREE.MeshBasicMaterial({ color: 0xffffff }),
+      new THREE.MeshBasicMaterial({ color: 0x26241f }),
     );
     cone.rotation.x = Math.PI; // tip points down at the car
     m.add(cone);
-    // thin dark outline shell so it reads against light cars/ball
+    // thin light outline shell so it reads against bright cars / dark lines
     const shell = new THREE.Mesh(
       new THREE.ConeGeometry(0.95, 1.5, 4),
-      new THREE.MeshBasicMaterial({ color: 0x1b1230, side: THREE.BackSide }),
+      new THREE.MeshBasicMaterial({ color: 0xfbf8f2, side: THREE.BackSide }),
     );
     shell.rotation.x = Math.PI;
     m.add(shell);
