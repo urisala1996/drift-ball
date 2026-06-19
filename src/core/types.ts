@@ -22,3 +22,6 @@ export const NEUTRAL_INPUT: DriveInput = {
 export type Team = 0 | 1;
 export type GameMode = '1v1' | '2v2';
 export type Difficulty = 'easy' | 'normal' | 'hard';
+// 'steer' = original car-steering (turn toward input, drive along facing).
+// 'direct' = twin-stick (move directly in the input world direction).
+export type ControlMode = 'steer' | 'direct';

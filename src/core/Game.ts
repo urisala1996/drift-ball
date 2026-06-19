@@ -10,7 +10,7 @@ import { CarView } from '../render/CarView';
 import { Scene } from '../render/Scene';
 import { CAR_COLORS, COLORS, FIXED_DT, MATCH, PITCH, TEAM_COLORS } from './constants';
 import { Input } from './Input';
-import type { Difficulty, GameMode, Team } from './types';
+import type { ControlMode, Difficulty, GameMode, Team } from './types';
 
 export type Phase = 'idle' | 'kickoff' | 'play' | 'goal' | 'ended';
 
@@ -47,6 +47,7 @@ export class Game {
   phase: Phase = 'idle';
   paused = false;
   awayColor: number = TEAM_COLORS[1];
+  controlMode: ControlMode = 'steer';
 
   private scores: [number, number] = [0, 0];
   private timeLeft = MATCH.durationSec;
@@ -85,6 +86,7 @@ export class Game {
         const isPlayer = t === 0 && i === 0;
         const color = teamColor[t];
         const car = new Car(t, color, isPlayer);
+        car.controlMode = this.controlMode;
         const view = new CarView(color, isPlayer);
         this.scene.scene.add(view.group);
         const unit: Unit = { car, view };
@@ -110,6 +112,12 @@ export class Game {
     this.clearUnits();
     this.phase = 'idle';
     this.scene.setOrbit(true);
+  }
+
+  // Switch control feel live (also applies to any in-progress match).
+  setControlMode(m: ControlMode) {
+    this.controlMode = m;
+    for (const u of this.units) u.car.controlMode = m;
   }
 
   private spawnPositions(): { x: number; z: number; yaw: number }[][] {

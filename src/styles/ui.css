@@ -228,6 +228,13 @@ body {
   font-weight: 700;
   margin: 0;
 }
+.hint {
+  font-size: 10px;
+  letter-spacing: 1px;
+  opacity: 0.5;
+  margin-top: -8px;
+  text-align: left;
+}
 
 /* garage swatches */
 .swatches {
@@ -436,23 +443,31 @@ body {
 }
 .touch-left {
   left: 0;
-  width: 45%;
-  justify-content: center;
+  width: 38%;
+  justify-content: flex-start;
+  padding-left: 2.5vw;
 }
 .touch-right {
   right: 0;
-  width: 45%;
-  justify-content: center;
+  width: 38%;
+  justify-content: flex-end;
+  padding-right: 2.5vw;
   gap: 18px;
 }
 /* lefty swaps joystick to the right */
 .touch.lefty .touch-left {
   left: auto;
   right: 0;
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 2.5vw;
 }
 .touch.lefty .touch-right {
   right: auto;
   left: 0;
+  justify-content: flex-start;
+  padding-right: 0;
+  padding-left: 2.5vw;
 }
 
 .joy-base {

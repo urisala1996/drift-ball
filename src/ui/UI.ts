@@ -199,6 +199,20 @@ export class UI {
     diffRow.appendChild(diffBtn);
     p.appendChild(diffRow);
 
+    // control feel (steer vs direct) — applies live
+    const ctrlRow = el('div', 'setting-row');
+    ctrlRow.appendChild(el('span', 'label', 'CONTROLS'));
+    const ctrlBtn = this.btn(settings.control.toUpperCase(), 'small', () => {
+      settings.control = settings.control === 'steer' ? 'direct' : 'steer';
+      ctrlBtn.textContent = settings.control.toUpperCase();
+      this.game.setControlMode(settings.control);
+      saveSettings();
+    });
+    ctrlRow.appendChild(ctrlBtn);
+    const ctrlHint = el('p', 'label hint', 'STEER = turn the car · DIRECT = move any direction');
+    p.appendChild(ctrlRow);
+    p.appendChild(ctrlHint);
+
     p.appendChild(this.btn('BACK', 'ghost', () => this.show('title')));
     s.appendChild(p);
     return s;
@@ -305,6 +319,7 @@ export class UI {
 
   private startMatch(mode: GameMode, diff: Difficulty) {
     this.activeMode = mode;
+    this.game.controlMode = settings.control;
     this.game.startMatch(mode, diff, settings.carColor);
     this.game.audio.volume = settings.volume;
     this.game.audio.setMuted(settings.muted);

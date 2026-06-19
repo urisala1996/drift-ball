@@ -1,4 +1,4 @@
-import type { Difficulty } from '../core/types';
+import type { ControlMode, Difficulty } from '../core/types';
 
 export interface Settings {
   carColor: number;
@@ -6,6 +6,7 @@ export interface Settings {
   muted: boolean;
   handedness: 'right' | 'left';
   difficulty: Difficulty;
+  control: ControlMode;
 }
 
 const KEY = 'driftball.settings.v1';
@@ -16,6 +17,7 @@ const DEFAULTS: Settings = {
   muted: false,
   handedness: 'right',
   difficulty: 'normal',
+  control: 'steer',
 };
 
 export const settings: Settings = load();

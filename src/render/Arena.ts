@@ -60,8 +60,8 @@ export function buildArena(): THREE.Group {
   }
 
   // goals
-  g.add(buildGoal(Z + 0.6, 1));
-  g.add(buildGoal(-Z - 0.6, -1));
+  g.add(buildGoal(Z + 0.6));
+  g.add(buildGoal(-Z - 0.6));
 
   return g;
 }
@@ -98,14 +98,13 @@ function addWall(
   g.add(capMesh);
 }
 
-// Goal: posts + crossbar (gold) and a pink glowing goal-line + suggested net.
-function buildGoal(z: number, dir: number): THREE.Group {
+// Goal: posts + crossbar (gold) and a pink glowing goal-line.
+function buildGoal(z: number): THREE.Group {
   const goal = new THREE.Group();
   const postMat = new THREE.MeshLambertMaterial({ color: COLORS.goalPost });
   const glowMat = new THREE.MeshBasicMaterial({ color: COLORS.goalGlow });
   const w = PITCH.goalHalfWidth;
   const h = PITCH.goalHeight;
-  const depth = PITCH.goalDepth;
 
   for (const sx of [-w, w]) {
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.8, h, 0.8), postMat);
@@ -121,12 +120,6 @@ function buildGoal(z: number, dir: number): THREE.Group {
   line.rotation.x = -Math.PI / 2;
   line.position.set(0, 0.08, z);
   goal.add(line);
-
-  // suggested net: a few thin bars receding behind the line
-  const netMat = new THREE.MeshBasicMaterial({ color: COLORS.goalGlow, transparent: true, opacity: 0.3 });
-  const back = new THREE.Mesh(new THREE.BoxGeometry(w * 2, h, 0.3), netMat);
-  back.position.set(0, h / 2, z + dir * depth);
-  goal.add(back);
 
   return goal;
 }
