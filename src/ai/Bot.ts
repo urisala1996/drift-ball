@@ -21,7 +21,7 @@ const DIFF: Record<Difficulty, DiffParams> = {
 export class Bot {
   private p: DiffParams;
   private timer = 0;
-  private cached: DriveInput = { kind: 'aim', x: 0, z: 0, mag: 0, boost: false, brake: false };
+  private cached: DriveInput = { x: 0, z: 0, mag: 0, boost: false };
   private jitter = 0;
 
   // roleBias: 0 = attacker (commits forward), 1 = defender (holds back). Used in 2v2.
@@ -96,12 +96,10 @@ export class Bot {
     const mag = defend && dist < 6 ? 0.3 : 1;
 
     this.cached = {
-      kind: 'aim',
       x: dx,
       z: dz,
       mag,
       boost: wantBoost,
-      brake: false,
     };
     return this.cached;
   }

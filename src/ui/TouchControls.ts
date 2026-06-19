@@ -8,7 +8,6 @@ export class TouchControls {
   private knob = document.createElement('div');
   private base = document.createElement('div');
   private boostBtn = document.createElement('button');
-  private brakeBtn = document.createElement('button');
   private joyId: number | null = null;
   private maxR = 56;
 
@@ -23,15 +22,12 @@ export class TouchControls {
 
     this.boostBtn.className = 'pad-btn pad-boost';
     this.boostBtn.textContent = 'BOOST';
-    this.brakeBtn.className = 'pad-btn pad-brake';
-    this.brakeBtn.textContent = 'BRAKE';
 
     const left = document.createElement('div');
     left.className = 'touch-left';
     const right = document.createElement('div');
     right.className = 'touch-right';
     left.appendChild(this.base);
-    right.appendChild(this.brakeBtn);
     right.appendChild(this.boostBtn);
     this.root.appendChild(left);
     this.root.appendChild(right);
@@ -39,7 +35,6 @@ export class TouchControls {
     this.applyHandedness();
     this.wireJoystick(left);
     this.wireButton(this.boostBtn, (v) => (this.input.touchBoost = v));
-    this.wireButton(this.brakeBtn, (v) => (this.input.touchBrake = v));
   }
 
   applyHandedness() {

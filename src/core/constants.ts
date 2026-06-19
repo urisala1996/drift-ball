@@ -43,8 +43,9 @@ export const PITCH = {
   goalDepth: 6,
 } as const;
 
-// ---- Car tuning (arcade drift, planar) ----
-// Chunkier toy cars, snappier control, less sticky grip, quicker reverse.
+// ---- Car tuning (direct world-direction movement, planar) ----
+// Chunky toy cars. Twin-stick control: accelerate toward the input direction
+// with momentum, body turns to face travel.
 export const CAR = {
   bodyW: 3.0,
   bodyH: 1.05,
@@ -52,17 +53,12 @@ export const CAR = {
   radius: 2.7, // collision radius (horizontal)
   topHeight: 2.6, // top of car for height-aware ball strikes
   mass: 1.0,
-  accel: 26,
+  accel: 30, // how fast velocity chases the target direction
   maxSpeed: 23,
-  boostAccel: 38,
+  boostAccel: 42,
   boostMaxSpeed: 34,
-  reverseSpeed: 14,
-  turnRate: 3.4, // rad/s at full authority
-  steerEase: 12, // how fast steering eases to target (snappier)
-  grip: 5.2, // lateral velocity bleed (lower = more responsive turn-in)
-  brakeGrip: 2.4, // grip while braking (lower = more scrub)
-  brakeDecel: 46,
-  reverseHold: 0.26, // seconds of brake before reverse engages (quicker)
+  coastDamp: 2.6, // how quickly the car slows when there's no input
+  yawEase: 9, // how fast the body rotates to face its travel direction
   boostDrain: 0.55, // per second
   boostRegen: 0.22, // per second
   restitution: 1.4, // car-car pop

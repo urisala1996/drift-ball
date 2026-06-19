@@ -2,30 +2,21 @@
 
 // Unified drive input. Touch joystick and AI produce 'aim' (a world-space
 // desired direction). Keyboard produces 'tank' (direct steer + throttle).
-export type DriveInput =
-  | {
-      kind: 'aim';
-      x: number; // desired direction X (world)
-      z: number; // desired direction Z (world)
-      mag: number; // 0..1 throttle / strength
-      boost: boolean;
-      brake: boolean;
-    }
-  | {
-      kind: 'tank';
-      steer: number; // -1..1
-      throttle: number; // -1..1 (negative = reverse intent)
-      boost: boolean;
-      brake: boolean;
-    };
+// Direct, world-direction movement: (x, z) is the world-space direction the
+// player/AI wants the car to travel, mag is 0..1 strength. The car drives that
+// way directly (twin-stick style) and orients its body to its travel direction.
+export interface DriveInput {
+  x: number;
+  z: number;
+  mag: number;
+  boost: boolean;
+}
 
 export const NEUTRAL_INPUT: DriveInput = {
-  kind: 'aim',
   x: 0,
   z: 0,
   mag: 0,
   boost: false,
-  brake: false,
 };
 
 export type Team = 0 | 1;

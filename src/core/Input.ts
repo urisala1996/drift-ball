@@ -1,14 +1,14 @@
 import type { DriveInput } from './types';
 import type { Scene } from '../render/Scene';
 
-// Unifies keyboard (tank steer) and touch joystick (aim) into a DriveInput for
-// the player car. TouchControls writes the joystick/buttons fields directly.
+// Unifies keyboard and touch joystick into a direct world-direction DriveInput.
+// Both map a screen-space direction to a world ground direction via the camera,
+// so "up" always means "away into the pitch" regardless of car facing.
 export class Input {
   // touch joystick vector in screen space (jx right+, jy up+), each -1..1
   joyScreenX = 0;
   joyScreenY = 0;
   touchBoost = false;
-  touchBrake = false;
   usingTouch = false;
 
   private keys = new Set<string>();
@@ -17,7 +17,6 @@ export class Input {
     addEventListener('keydown', (e) => {
       this.keys.add(e.code);
       this.usingTouch = false;
-      if (e.code === 'Space') e.preventDefault();
     });
     addEventListener('keyup', (e) => this.keys.delete(e.code));
     addEventListener('blur', () => this.keys.clear());
@@ -30,28 +29,32 @@ export class Input {
   }
 
   getInput(scene: Scene): DriveInput {
+    let sx: number;
+    let sy: number;
+    let mag: number;
+    let boost: boolean;
+
     if (this.usingTouch) {
-      const mag = Math.min(1, Math.hypot(this.joyScreenX, this.joyScreenY));
-      const dir = scene.screenToWorldDir(this.joyScreenX, this.joyScreenY);
-      const dl = Math.hypot(dir.x, dir.z) || 1;
-      return {
-        kind: 'aim',
-        x: dir.x / dl,
-        z: dir.z / dl,
-        mag,
-        boost: this.touchBoost,
-        brake: this.touchBrake,
-      };
+      sx = this.joyScreenX;
+      sy = this.joyScreenY;
+      mag = Math.min(1, Math.hypot(sx, sy));
+      boost = this.touchBoost;
+    } else {
+      sx = 0;
+      sy = 0;
+      if (this.keys.has('ArrowLeft') || this.keys.has('KeyA')) sx -= 1;
+      if (this.keys.has('ArrowRight') || this.keys.has('KeyD')) sx += 1;
+      if (this.keys.has('ArrowUp') || this.keys.has('KeyW')) sy += 1;
+      if (this.keys.has('ArrowDown') || this.keys.has('KeyS')) sy -= 1;
+      mag = sx || sy ? 1 : 0;
+      boost = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') || this.keys.has('Space');
     }
 
-    let steer = 0;
-    let throttle = 0;
-    if (this.keys.has('ArrowLeft') || this.keys.has('KeyA')) steer -= 1;
-    if (this.keys.has('ArrowRight') || this.keys.has('KeyD')) steer += 1;
-    if (this.keys.has('ArrowUp') || this.keys.has('KeyW')) throttle += 1;
-    if (this.keys.has('ArrowDown') || this.keys.has('KeyS')) throttle -= 1;
-    const boost = this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
-    const brake = this.keys.has('Space');
-    return { kind: 'tank', steer, throttle, boost, brake };
+    if (mag < 0.08) {
+      return { x: 0, z: 0, mag: 0, boost };
+    }
+    const dir = scene.screenToWorldDir(sx, sy);
+    const dl = Math.hypot(dir.x, dir.z) || 1;
+    return { x: dir.x / dl, z: dir.z / dl, mag, boost };
   }
 }
