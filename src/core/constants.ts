@@ -60,10 +60,13 @@ export const CAR = {
   boostMaxSpeed: 34,
   coastDamp: 2.6, // how quickly the car slows when there's no input
   yawEase: 9, // (direct mode) how fast the body rotates to face travel
-  // steer mode: rotate toward the input direction and drive along facing
+  // steer / arcade modes: rotate toward input and drive along facing
   turnRate: 3.4, // rad/s at full authority
   steerEase: 12, // how fast steering eases to target
   grip: 5.2, // lateral velocity bleed (drift)
+  // arcade mode: auto-drive + brake/reverse
+  brakeDecel: 40,
+  reverseSpeed: 13,
   boostDrain: 0.55, // per second
   boostRegen: 0.22, // per second
   restitution: 1.4, // car-car pop

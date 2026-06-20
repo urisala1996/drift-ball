@@ -1,6 +1,6 @@
 import { CAR_COLORS, MATCH } from '../core/constants';
 import type { Game } from '../core/Game';
-import type { Difficulty, GameMode, Team } from '../core/types';
+import type { ControlMode, Difficulty, GameMode, Team } from '../core/types';
 import { saveSettings, settings } from '../state/Store';
 import type { TouchControls } from './TouchControls';
 
@@ -199,17 +199,23 @@ export class UI {
     diffRow.appendChild(diffBtn);
     p.appendChild(diffRow);
 
-    // control feel (steer vs direct) — applies live
+    // control feel (steer / direct / arcade) — applies live
+    const modes: ControlMode[] = ['steer', 'direct', 'arcade'];
     const ctrlRow = el('div', 'setting-row');
     ctrlRow.appendChild(el('span', 'label', 'CONTROLS'));
     const ctrlBtn = this.btn(settings.control.toUpperCase(), 'small', () => {
-      settings.control = settings.control === 'steer' ? 'direct' : 'steer';
+      settings.control = modes[(modes.indexOf(settings.control) + 1) % modes.length];
       ctrlBtn.textContent = settings.control.toUpperCase();
       this.game.setControlMode(settings.control);
+      this.touch.setMode(settings.control);
       saveSettings();
     });
     ctrlRow.appendChild(ctrlBtn);
-    const ctrlHint = el('p', 'label hint', 'STEER = turn the car · DIRECT = move any direction');
+    const ctrlHint = el(
+      'p',
+      'label hint',
+      'STEER = turn the car · DIRECT = move any direction · ARCADE = auto-drive, only steer/brake/turbo',
+    );
     p.appendChild(ctrlRow);
     p.appendChild(ctrlHint);
 
@@ -226,8 +232,9 @@ export class UI {
         'div',
         'howto',
         `<p><b>GOAL:</b> ram the big ball into the enemy goal. You never control the ball — it's pure physics.</p>
-         <p><b>TOUCH:</b> left joystick steers/drives, right buttons BOOST and BRAKE.</p>
-         <p><b>KEYBOARD:</b> WASD / arrows to drive, SHIFT to boost, SPACE to brake.</p>
+         <p><b>TOUCH:</b> joystick to drive + BOOST. Or switch to ARCADE in Settings: auto-drive with ◀ ▶, BRAKE and TURBO buttons.</p>
+         <p><b>KEYBOARD:</b> WASD / arrows to drive, SHIFT to boost.</p>
+         <p><b>CONTROLS:</b> pick STEER, DIRECT or ARCADE in Settings.</p>
          <p><b>WIN:</b> first to ${MATCH.goalsToWin} goals, or lead when the ${Math.round(
            MATCH.durationSec / 60,
          )}:00 timer ends. Tie → golden goal.</p>`,
@@ -320,6 +327,7 @@ export class UI {
   private startMatch(mode: GameMode, diff: Difficulty) {
     this.activeMode = mode;
     this.game.controlMode = settings.control;
+    this.touch.setMode(settings.control);
     this.game.startMatch(mode, diff, settings.carColor);
     this.game.audio.volume = settings.volume;
     this.game.audio.setMuted(settings.muted);

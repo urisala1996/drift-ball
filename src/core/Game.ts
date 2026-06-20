@@ -86,7 +86,9 @@ export class Game {
         const isPlayer = t === 0 && i === 0;
         const color = teamColor[t];
         const car = new Car(t, color, isPlayer);
-        car.controlMode = this.controlMode;
+        // Only the player uses the chosen control mode; bots drive via their
+        // aim vector (steer mode), which arcade input wouldn't provide.
+        car.controlMode = isPlayer ? this.controlMode : 'steer';
         const view = new CarView(color, isPlayer);
         this.scene.scene.add(view.group);
         const unit: Unit = { car, view };
@@ -114,10 +116,11 @@ export class Game {
     this.scene.setOrbit(true);
   }
 
-  // Switch control feel live (also applies to any in-progress match).
+  // Switch control feel live (player car only; bots keep steering).
   setControlMode(m: ControlMode) {
     this.controlMode = m;
-    for (const u of this.units) u.car.controlMode = m;
+    const p = this.units.find((u) => u.car.isPlayer);
+    if (p) p.car.controlMode = m;
   }
 
   private spawnPositions(): { x: number; z: number; yaw: number }[][] {
@@ -211,7 +214,7 @@ export class Game {
     for (const u of this.units) {
       let drive;
       if (u.car.isPlayer) {
-        drive = this.input.getInput(this.scene);
+        drive = this.input.getInput(this.scene, u.car.controlMode);
       } else {
         drive = u.bot!.update(this.ball, dt);
       }

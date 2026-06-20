@@ -72,15 +72,18 @@ export class Car {
       dirX /= len;
       dirZ /= len;
     }
-    // Boost with no joystick drives along current facing (useful at kickoff).
-    if (boostAvail && mag <= 0.08) {
-      dirX = this.forwardX();
-      dirZ = this.forwardZ();
-      mag = 1;
+    if (this.controlMode === 'arcade') {
+      this.driveArcade(input.steer, input.brake, maxSpeed, accel, dt);
+    } else {
+      // Boost with no joystick drives along current facing (useful at kickoff).
+      if (boostAvail && mag <= 0.08) {
+        dirX = this.forwardX();
+        dirZ = this.forwardZ();
+        mag = 1;
+      }
+      if (this.controlMode === 'steer') this.driveSteer(dirX, dirZ, mag, maxSpeed, accel, dt);
+      else this.driveDirect(dirX, dirZ, mag, maxSpeed, accel, dt);
     }
-
-    if (this.controlMode === 'steer') this.driveSteer(dirX, dirZ, mag, maxSpeed, accel, dt);
-    else this.driveDirect(dirX, dirZ, mag, maxSpeed, accel, dt);
 
     // boost meter
     if (boostAvail) this.boostMeter = Math.max(0, this.boostMeter - CAR.boostDrain * dt);
@@ -133,6 +136,42 @@ export class Car {
       vForward = Math.min(maxSpeed, vForward + accel * throttle * dt);
     } else {
       vForward *= Math.exp(-CAR.coastDamp * dt);
+    }
+
+    const nfx = this.forwardX();
+    const nfz = this.forwardZ();
+    const keep = Math.exp(-CAR.grip * dt);
+    latX *= keep;
+    latZ *= keep;
+    this.vx = nfx * vForward + latX;
+    this.vz = nfz * vForward + latZ;
+  }
+
+  // Arcade auto-drive: the car always accelerates forward; Left/Right steer it,
+  // Brake slows then reverses. Boost raises top speed/accel.
+  private driveArcade(
+    steerInput: number,
+    brake: boolean,
+    maxSpeed: number,
+    accel: number,
+    dt: number,
+  ) {
+    this.braking = brake;
+    const fx = this.forwardX();
+    const fz = this.forwardZ();
+    let vForward = this.vx * fx + this.vz * fz;
+    let latX = this.vx - vForward * fx;
+    let latZ = this.vz - vForward * fz;
+
+    this.steer += (steerInput - this.steer) * Math.min(1, CAR.steerEase * dt);
+    const speedNorm = 0.45 + 0.55 * Math.min(1, Math.abs(vForward) / 7);
+    this.yaw += this.steer * CAR.turnRate * speedNorm * dt;
+
+    if (brake) {
+      if (vForward > 0.2) vForward = Math.max(0, vForward - CAR.brakeDecel * dt);
+      else vForward = Math.max(-CAR.reverseSpeed, vForward - accel * dt);
+    } else {
+      vForward = Math.min(maxSpeed, vForward + accel * dt);
     }
 
     const nfx = this.forwardX();

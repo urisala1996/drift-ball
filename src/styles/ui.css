@@ -522,6 +522,19 @@ body {
   transform: scale(0.92);
   filter: brightness(1.08);
 }
+.arcade-steer,
+.arcade-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pad-steer {
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 26px;
+}
+.pad-turbo {
+  background: var(--amber);
+}
 
 @media (pointer: fine) {
   .touch {
